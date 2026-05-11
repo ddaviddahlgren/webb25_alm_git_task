@@ -1,13 +1,41 @@
-const jwt = require("jsonwebtoken");
+import { verifyAccessToken } from "../utils/tokens";
 
-module.exports = function protect(req, res, next) {
-  const header = req.headers.authorization || "";
-  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
-  if (!token) return res.status(401).json({ message: "Not authenticated" });
+export const authenticateToken = (req, res, next) => {
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch {
-    res.status(401).json({ message: "Invalid or expired token" });
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+
+    if (!token) {
+      return res.status(401).json({
+        message: 'Acess token required'
+      })
+    }
+
+    const verifiedUser = verifyAccessToken(token)
+
+    if (!verifiedUser || !verifiedUser.userId) {
+      return req.status(403).json({
+        message: 'Invalid token payload'
+      })
+    }
+
+    req.userId = verifiedUser.userId
+    req.user = verifiedUser
+    next()
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        message: 'Token has expired'
+      })
+    }
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(403).json({
+        message: 'Invalid token'
+      })
+    }
+    return res.status(500).json({
+      message: 'Authenication error',
+      erorr: error.message
+    })
   }
-};
+}

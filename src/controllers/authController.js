@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt')
 const User = require('../models/User')
-import { generateAccessToken, genereateRefreshToken, verifyRefreshToken } from '../utils/tokens'
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/tokens.js'
 
 exports.register = async (req, res) => {
   try {

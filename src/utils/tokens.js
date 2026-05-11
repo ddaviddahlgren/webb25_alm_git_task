@@ -10,14 +10,14 @@ if (!process.env.JWT_REFRESH_SECRET) {
 
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET
-const JWT_ACESS_EXPIRES = process.env.JWT_ACCESS_EXPIRES
+const JWT_ACCESS_EXPIRES = process.env.JWT_ACCESS_EXPIRES
 const JWT_REFRESH_EXPIRES = process.env.JWT_REFRESH_EXPIRES
 
 export const generateAccessToken = (userId, firstName = '') => {
-  return jwt.sign({ userId, fistName }, JWT_ACCESS_SECRET, { expiresIn: JWT_ACESS_EXPIRES })
+  return jwt.sign({ userId, firstName }, JWT_ACCESS_SECRET, { expiresIn: JWT_ACCESS_EXPIRES })
 }
 
-export const generateRefreshToken = (userId, fistName = '') => {
+export const generateRefreshToken = (userId, firstName = '') => {
   return jwt.sign({ userId, firstName }, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES })
 }
 

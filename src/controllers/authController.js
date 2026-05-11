@@ -2,10 +2,6 @@ const bcrypt = require('bcrypt')
 const User = require('../models/User')
 import { generateAccessToken, genereateRefreshToken, verifyRefreshToken } from '../utils/tokens'
 
-function signToken(user) {
-  return jwt.sign({ sub: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' })
-}
-
 exports.register = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body

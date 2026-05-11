@@ -1,91 +1,69 @@
-const Product = require("../models/Category");
+const Category = require('../models/Category')
 
-const getCategories = async (req, res) => {
+exports.getAllCategories = async (req, res) => {
   try {
-    let { name } = req.query;
-    let categories = await Category.find();
-    if (name && name.trim() !== "") {
-      products = products.filter((p) =>
-        p.name.toLowerCase().includes(name.toLowerCase()),
-      );
-    }
-    res.status(200).json(products);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Could not fetch categries", error: error.message });
+    const categories = await Category.find()
+    res.status(200).json(categories)
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch categories', error: err.message })
   }
-};
-
-const getCategoryById = async (res, req) => {
-  try {
-    const category = await Category.findById(req.params.id);
-
-    if (!category) {
-      return res.status(404).json({ message: "Couldn't find category" });
-    }
-
-    res.status(200).json(category);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Coldn't get category", error: error.message });
-  }
-};
-
-const createCategory = async (req, res) => {
-  try {
-    const newCategory = await Category.create(req.body);
-    res.status(201).json(newCategory);
-  } catch (error) {
-    res
-      .status(400)
-      .json({ message: "Couldn't create categortý", error: error.message });
-  }
-};
-
-const updateCategory = async (req, res) => {
-  try {
-    const updatedCategory = await Category.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      },
-    );
-
-    if (!updateCategory) {
-      return res.status(404).json({ message: "Couldn't find category" });
-    }
-
-    res.status(200).json(updatedCategory);
-  } catch (error) {
-    res
-      .status(400)
-      .json({ message: "Couldn't update category", error: error.message });
-  }
-};
-
-const deleteCategory = async (req, res) => {
-    try {
-        const deletedCategory = await Category.findByIdAndDelete(req.params.id)
-
-        if (!deletedCategory) {
-            return res.status(404).json({ message: "Couldn't find category"})
-        }
-
-        res.status(200).json({ message: "Category deleted"})
-    } catch (error) {
-        res.status(500)
-        .json({ message: "Couldn't delete category", error: error.message })
-    }
 }
 
-module.exports = {
-    getCategories,
-    getCategoryById,
-    createCategory,
-    updateCategory,
-    deleteCategory
+exports.getCategoryById = async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id)
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' })
+    }
+    res.status(200).json(category)
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid category id' })
+    }
+    res.status(500).json({ message: 'Failed to fetch category', error: err.message })
+  }
+}
+
+exports.createCategory = async (req, res) => {
+  try {
+    const category = new Category(req.body)
+    const saved = await category.save()
+    res.status(201).json(saved)
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to create category', error: err.message })
+  }
+}
+
+exports.updateCategory = async (req, res) => {
+  try {
+    const updated = await Category.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    )
+    if (!updated) {
+      return res.status(404).json({ message: 'Category not found' })
+    }
+    res.status(200).json(updated)
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid category id' })
+    }
+    res.status(500).json({ message: 'Failed to update category', error: err.message })
+  }
+}
+
+exports.deleteCategory = async (req, res) => {
+  try {
+    const deleted = await Category.findByIdAndDelete(req.params.id)
+    if (!deleted) {
+      return res.status(404).json({ message: 'Category not found' })
+    }
+    res.status(204).send()
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid category id' })
+    }
+    res.status(500).json({ message: 'Failed to delete category', error: err.message })
+  }
 }

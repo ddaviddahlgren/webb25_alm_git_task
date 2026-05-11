@@ -1,33 +1,38 @@
-const mongoose = require("mongoose");
-
+const mongoose = require('mongoose')
+const ProductPriceHistory = require('./ProductPriceHistory')
 const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Product name is required"],
-      trim: true,
-      validate: {
-        validator: () => !this.name,
-        message: "Name required",
-      },
+      required: [true, 'Product name is required'],
+      trim: true
     },
     price: {
       type: Number,
-      required: [true, 'Product price is required'],
-      validate: {
-        validator: (value) => value >= 0,
-        message: "Price cannot be negative values"
-        
-      }
+      min: 0,
+      required: [true, 'Product price is required']
     },
     description: {
       type: String,
-      default: "",
+      default: ''
     },
+    category: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "Category",
+      required: false,
+      trim: true
+    }
   },
   {
-    timestamps: true,
-  },
-);
+    timestamps: true
+  }
+)
 
-module.exports = mongoose.model("Product", productSchema);
+productSchema.pre('save', async function(next) {
+  if (this.isNew || this.isModified('price')) {
+    await ProductPriceHistory.create({ product: this._id, price: this.price, date: Date.now() })
+  }
+  next()
+})
+
+module.exports = mongoose.model('Product', productSchema)

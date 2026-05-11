@@ -1,24 +1,27 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const categorySchema = new mongoose.Schema(
-    // TODO: Add validation
   {
     name: {
       type: String,
-      required: true,
+      required: [true, 'Category name is required'],
+      enum: {
+        values: ['electronics', 'clothing', 'home'],
+        message: '{VALUE} is not a supported category'
+      },
+      trim: true
     },
     description: {
-      type: String,
-      max: 20,
+      type: String
     },
     isActive: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
   {
-    timestamps: true,
-  },
-);
+    timestamps: true
+  }
+)
 
-module.exports = mongoose.model("Category", categorySchema)
+module.exports = mongoose.model('Category', categorySchema)

@@ -2,15 +2,20 @@ const request = require('supertest')
 const mongoose = require('mongoose')
 const app = require('../src/app')
 const Product = require('../src/models/Product')
+const Category = require('../src/models/Category')
 
 const MONGODB_TEST_URI = process.env.MONGODB_TEST_URI || 'mongodb://127.0.0.1:27017/product_api_test'
 
 describe('Product API', () => {
+  let category
   let product
   let productId
 
   beforeAll(async () => {
     await mongoose.connect(MONGODB_TEST_URI)
+    category = await Category.create({
+      name: 'electronics'
+    })
   })
 
   afterAll(async () => {
@@ -22,7 +27,8 @@ describe('Product API', () => {
     product = await Product.create({
       name: 'Keyboard',
       price: 499,
-      description: 'Mechanical keyboard'
+      description: 'Mechanical keyboard',
+      category: category._id
     })
     productId = product._id
   })
@@ -40,7 +46,8 @@ describe('Product API', () => {
     const response = await request(app).post('/products').send({
       name: 'Mouse',
       price: 199,
-      description: 'Wireless mouse'
+      description: 'Wireless mouse',
+      category: category._id
     })
     expect(response.status).toBe(201)
     expect(response.body.name).toBe('Mouse')
@@ -90,9 +97,9 @@ describe('Product API', () => {
 
   it('should return 400 when update fails validation', async () => {
     const response = await request(app).put(`/products/${productId}`).send({
-      name: 'Keyboard',
-      price: 10,
-      category: 'food'
+      name: '',
+      category: category._id,
+      price: 10
     })
     expect(response.status).toBe(400)
     expect(response.body.message).toBe('Invalid product data')
